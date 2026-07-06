@@ -1,0 +1,22 @@
+name: Sync fork with upstream
+
+on:
+  schedule:
+    - cron: '0 6 * * 1'   # Every Monday at 06:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Sync main from KelvinTegelaar/CIPP
+        env:
+          # If secrets.SYNC_PAT (a classic PAT with repo+workflow scopes) is set,
+          # the resulting push to main will trigger the SWA deploy workflow automatically.
+          # If not set, the sync still fast-forwards main, but you'll need to manually
+          # run the "Azure Static Web Apps CI/CD" workflow to publish the update.
+          GH_TOKEN: ${{ secrets.SYNC_PAT || github.token }}
+        run: gh repo sync ${{ github.repository }} --source KelvinTegelaar/CIPP --branch main
